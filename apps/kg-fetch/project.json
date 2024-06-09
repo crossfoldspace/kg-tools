@@ -1,0 +1,56 @@
+{
+  "name": "kg-fetch",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/kg-fetch/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/kg-fetch",
+        "format": ["cjs"],
+        "bundle": false,
+        "main": "apps/kg-fetch/src/main.ts",
+        "tsConfig": "apps/kg-fetch/tsconfig.app.json",
+        "assets": ["apps/kg-fetch/src/assets"],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "kg-fetch:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "kg-fetch:build:development"
+        },
+        "production": {
+          "buildTarget": "kg-fetch:build:production"
+        }
+      }
+    }
+  }
+}
