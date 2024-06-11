@@ -35,5 +35,10 @@
       },
       "exclude": ["apps/kg-fetch-e2e/**/*"]
     }
-  ]
+  ],
+  "release": {
+    "version": {
+      "preVersionCommand": "npx nx run-many -t build"
+    }
+  }
 }

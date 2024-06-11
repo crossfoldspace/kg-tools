@@ -1,11 +1,19 @@
 {
-  "name": "@kg-fetch/source",
+  "name": "@crossfold/kg-tools",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@effect/cli": "^0.36.43",
+    "@effect/platform": "^0.56.0",
+    "@effect/platform-node": "^0.51.8",
+    "@effect/schema": "^0.67.21",
     "axios": "^1.6.0",
+    "dotenv": "^16.4.5",
+    "effect": "^3.3.0",
+    "luxon": "^3.4.4",
+    "neo4j-driver": "^5.21.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -32,6 +40,10 @@
     "prettier": "^2.6.2",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
-    "typescript": "~5.4.2"
+    "typescript": "~5.4.2",
+    "verdaccio": "^5.0.4"
+  },
+  "nx": {
+    "includedScripts": []
   }
 }
