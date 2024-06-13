@@ -7,7 +7,7 @@ import {
 } from 'effect';
 import * as Http from '@effect/platform/HttpClient';
 
-import { DateTime } from 'luxon';
+import { formatISO } from "date-fns";
 
 import * as KgGraphQL from '@crossfold/kg-graphql';
 
@@ -23,11 +23,11 @@ const ghApi = (pat: string) =>
 const ghSearchTopics = (topics: string[]) =>
   topics.map((topic) => `${topic} in:topics`).join(' OR ');
 
-const ghSearchTopicBetween = (from: DateTime, to: DateTime, topics: string[]) =>
-  `${ghSearchTopics(topics)} created:${from.toISODate()}..${to.toISODate()}`;
+const ghSearchTopicBetween = (from: Date, to: Date, topics: string[]) =>
+  `${ghSearchTopics(topics)} created:${formatISO(from)}..${formatISO(to)}`;
 
 const ghQuery =
-  (from: DateTime, to: DateTime, topics: string[]) => (cursor: string) =>
+  (from: Date, to: Date, topics: string[]) => (cursor: string) =>
     `
             query topicalRepositories${cursor ? '($cursor: String!)' : ''} {
               search(query:"${ghSearchTopicBetween(
@@ -54,8 +54,8 @@ const ghQuery =
                     updatedAt
                     createdAt
                     isTemplate
-                    repositoryTopics {nodes {topic {name}}}
-                    languages {nodes {name}}
+                    repositoryTopics(first:20) {nodes {topic {name}}}
+                    languages(first:20) {nodes {name}}
                     forkCount
                     stargazerCount
                   }
@@ -67,8 +67,8 @@ const ghQuery =
 export const fetchGithubRepositories = (
   pat: string,
   topics: string[],
-  from: DateTime,
-  to: DateTime
+  from: Date,
+  to: Date
 ) => {
   const ghApiWithAuth = ghApi(pat);
   const queryWithCursor = ghQuery(from, to, topics);

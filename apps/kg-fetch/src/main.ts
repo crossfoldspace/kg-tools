@@ -3,8 +3,6 @@ import { NodeContext, NodeRuntime } from "@effect/platform-node"
 
 import { Array, Config, ConfigProvider, Console, Effect, Stream, Option, Either, pipe } from "effect"
 
-import { DateTime } from "luxon";
-
 import dotenv from 'dotenv'; 
 
 import neo4j from 'neo4j-driver';
@@ -32,7 +30,7 @@ export const ghtStream = Command.make(
   { ghPat, topics, fromDate, toDate },
   ({ ghPat, topics, fromDate, toDate }) => CypherClientService.pipe(
     Effect.andThen(cc =>
-      fetchGithubRepositories(ghPat, topics, DateTime.fromJSDate(fromDate), DateTime.fromJSDate(toDate)).pipe(
+      fetchGithubRepositories(ghPat, topics, fromDate, toDate).pipe(
         // Stream.runForEach( repo => Console.log(repo.nameWithOwner))
         Stream.runForEach( repo => pipe(
           Effect.succeed(repo),
