@@ -25,6 +25,18 @@ describe('kg-graphql', () => {
     // console.log(result)
     expect(result.data.user.id).toBeDefined();
   });
+  it('should call github rest api', async () => {
+    const getRepositoryCollaborators = Http.request
+      .get('https://api.github.com/repos/neo4j/neo4j/contributors')
+      .pipe(
+        Http.client.fetch,
+        Http.response.json
+      );
+
+    const result: any = await Effect.runPromise(getRepositoryCollaborators);
+    // console.log(result)
+    expect(result[0].login).toBeDefined();
+  })
   it('should be convenient for calling graphqlzero', async () => {
     const getPostAsJson = KgGraphql.graphql('https://graphqlzero.almansi.me/api').pipe(
       KgGraphql.queryBody(`
@@ -41,7 +53,7 @@ describe('kg-graphql', () => {
     );
 
     const result: any = await Effect.runPromise(getPostAsJson);
-    console.log(result);
+    // console.log(result);
     expect(result.data.user.id).toBeDefined();
   });
 });

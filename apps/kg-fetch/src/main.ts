@@ -45,7 +45,7 @@ export const ghtStream = Command.make(
               forkCount: repo.forkCount,
               stargazerCount: repo.stargazerCount,
               topics: repo.repositoryTopics.nodes.map(repoTopic => repoTopic.topic.name),
-              languages: repo.languages.nodes.map( lang => lang.name )
+              languages: repo.languages.nodes.map( lang => lang.name ),
           })),
           Effect.tap(params => Console.log(`${params.owner}/${params.name}`)),
           Effect.flatMap(params => cc.query(mergeGithubRepository(repo), params))

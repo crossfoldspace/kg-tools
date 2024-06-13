@@ -29,39 +29,34 @@ const ghSearchTopicBetween = (from: Date, to: Date, topics: string[]) =>
 const ghQuery =
   (from: Date, to: Date, topics: string[]) => (cursor: string) =>
     `
-            query topicalRepositories${cursor ? '($cursor: String!)' : ''} {
-              search(query:"${ghSearchTopicBetween(
-                from,
-                to,
-                topics
-              )}", type:REPOSITORY, first: 100, ${
-      cursor !== '' ? 'after: $cursor' : ''
-    }) {
-                pageInfo {
-                  startCursor
-                  hasNextPage
-                  endCursor
-                }
-                repositoryCount
-                nodes {
-                  ... on Repository {
-                    id
-                    url
-                    owner { login,  __typename}
-                    name
-                    nameWithOwner
-                    description
-                    updatedAt
-                    createdAt
-                    isTemplate
-                    repositoryTopics(first:20) {nodes {topic {name}}}
-                    languages(first:20) {nodes {name}}
-                    forkCount
-                    stargazerCount
-                  }
-                }
-              }
-            }
+    query topicalRepositories${cursor ? '($cursor: String!)' : ''} {
+      search(query:"${ghSearchTopicBetween(from, to, topics)}", type:REPOSITORY, first: 100, ${ cursor !== '' ? 'after: $cursor' : ''}) 
+      {
+        pageInfo {
+          startCursor
+          hasNextPage
+          endCursor
+        }
+        repositoryCount
+        nodes {
+          ... on Repository {
+            id
+            url
+            owner { login,  __typename}
+            name
+            nameWithOwner
+            description
+            updatedAt
+            createdAt
+            isTemplate
+            repositoryTopics(first:20) {nodes {topic {name}}}
+            languages(first:20) {nodes {name}}
+            forkCount
+            stargazerCount
+          }
+        }
+      }
+    }
           `;
 
 export const fetchGithubRepositories = (
@@ -95,4 +90,5 @@ export const fetchGithubRepositories = (
     )
   );
 };
+
 

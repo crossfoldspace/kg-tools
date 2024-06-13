@@ -1,6 +1,6 @@
 import { pipe, Stream, Effect, Option, Chunk, Random } from "effect"
 
-import { addDays } from "date-fns";
+import { addDays, compareAsc } from "date-fns";
 
 
 describe('effect streams', () => {
@@ -26,7 +26,7 @@ describe('effect streams', () => {
   it('10 date range from date-fns', async () => {
     const dateRange = (from:Date, until:Date) => {
       const daysUntil = (until:Date) => (day:Date) => pipe(
-        (day <= until) ? Option.some(addDays(day, 1)) : Option.none(),
+        (day < until) ? Option.some(addDays(day, 1)) : Option.none(),
         Option.map(nextDay => [day, nextDay] as const)
       )
       return Stream.unfold(from, daysUntil(until)) 
@@ -54,6 +54,28 @@ describe('effect streams', () => {
     //   2024-06-22T10:23:22.654Z,
     //   2024-06-23T10:23:22.654Z
     // ]
-    expect(dates.length).toBe(11); // range is inclusive of start & end
+    expect(dates.length).toBe(10); // range excludes the upper bound
+  })
+  it('10 day intervals', async () => {
+    const earliestDate = (a:Date, b:Date) => (compareAsc(a,b) <  1) ? a : b
+
+    const dateInterval = (from:Date, until:Date, interval:number) => {
+      const intervalsUntil = (until:Date) => (day:Date) => pipe(
+        (day < until) ? Option.some(addDays(day, interval)) : Option.none(),
+        Option.map(nextDay => [[day, earliestDate(nextDay, until)], nextDay] as const)
+      )
+      return Stream.unfold(from, intervalsUntil(until))
+    }
+    
+    const weekly = pipe(
+      new Date(),
+      ( now => dateInterval(now, addDays(now, 30), 3) ),
+      Stream.runCollect,
+      Effect.map(Chunk.toReadonlyArray)
+    )
+    const dates = await Effect.runPromise(weekly)
+
+    console.log(dates); // for example...
+    expect(dates.length).toBe(5); 
   })
 });
