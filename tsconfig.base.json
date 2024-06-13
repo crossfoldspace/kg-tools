@@ -15,8 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@crossfold/experiment": ["packages/experiment/src/index.ts"],
       "@crossfold/kg-cypher": ["packages/kg-cypher/src/index.ts"],
-      "@crossfold/kg-graphql": ["packages/kg-graphql/src/index.ts"]
+      "@crossfold/kg-graphql": ["packages/kg-graphql/src/index.ts"],
+      "@crossfold/kg-polars": ["packages/kg-polars/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,31 +1,18 @@
-import { FileSystem } from '@effect/platform';
 import {
-  NodeFileSystem,
-  NodeContext,
-  NodeRuntime,
-  NodeTerminal,
-} from '@effect/platform-node';
-import {
-  Array,
-  Config,
-  ConfigProvider,
   Console,
   Chunk,
   Effect,
   Option,
   Stream,
-  pipe,
 } from 'effect';
 import * as Http from '@effect/platform/HttpClient';
-
-import { Terminal } from '@effect/platform';
 
 import { DateTime } from 'luxon';
 
 import * as KgGraphQL from '@crossfold/kg-graphql';
 
 import { decodeGithubSearchResult } from './gh-response.js';
-import type { GithubSearchResult, GithubRepository } from './gh-response.js';
+import type { GithubRepository } from './gh-response.js';
 
 const GITHUB_GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
 const ghApi = (pat: string) =>
@@ -67,11 +54,10 @@ const ghQuery =
                     updatedAt
                     createdAt
                     isTemplate
-                    repositoryTopics(first:10) {nodes {topic {name}}}
-                    languages(first:10) {nodes {name}}
-                    forks(first:10) {
-                      totalCount
-                    }
+                    repositoryTopics {nodes {topic {name}}}
+                    languages {nodes {name}}
+                    forkCount
+                    stargazerCount
                   }
                 }
               }
@@ -94,7 +80,7 @@ export const fetchGithubRepositories = (
     );
   return Stream.paginateChunkEffect('', (cursor) =>
     ghApiWithCursor(cursor).pipe(
-      Effect.tap((response) => Console.log(response)),
+      // Effect.tap((response) => Console.log(response)),
       Effect.flatMap(decodeGithubSearchResult),
       Effect.map((result) => result.search),
       // Effect.tap( page => Console.log(page.search.pageInfo.hasNextPage)),
@@ -109,3 +95,4 @@ export const fetchGithubRepositories = (
     )
   );
 };
+

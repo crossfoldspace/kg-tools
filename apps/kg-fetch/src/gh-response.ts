@@ -20,7 +20,8 @@ export const GithubRepository = Schema.Struct(
     isTemplate: Schema.Boolean,
     repositoryTopics: Schema.Struct({ nodes: Schema.Array(GithubTopic)}),
     languages: Schema.Struct({ nodes: Schema.Array(Schema.Struct({ name: Schema.String })) }),
-    forks: Schema.Struct({ totalCount: Schema.Number })
+    forkCount: Schema.Number,
+    stargazerCount: Schema.Number
   }
 )
 export interface GithubRepository extends Schema.Schema.Type<typeof GithubRepository> {}

@@ -2,16 +2,22 @@
 import { Schema } from '@effect/schema';
 import { Effect, Context, pipe } from 'effect';
 
+import {Date as Neo4jDate} from 'neo4j-driver/types';
+
+export type QueryParameterScalar = number | string | boolean | Neo4jDate<number>
+export type QueryParameterValue = QueryParameterScalar | QueryParameterScalar[] | QueryParameters | QueryParameters[]
+export interface QueryParameters extends Readonly<Record<string, Readonly<QueryParameterValue>>> {}
+
 /**
  * A CypherClient can execute Cypher queries.
  */
 export interface CypherClient {
-  readonly query: (cypher: string) => Effect.Effect<any, unknown, never>;
+  readonly query: (cypher: string, parameters?: QueryParameters) => Effect.Effect<any, unknown, never>;
   readonly close: () => Promise<void>;
 }
 
 
-export class CypherClientService extends Context.Tag("@kg/cypher/CypherClient")<
+export class CypherClientService extends Context.Tag("@crossfold/cypher/CypherClient")<
   CypherClientService,
   CypherClient
 >() {}

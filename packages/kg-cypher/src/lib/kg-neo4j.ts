@@ -6,7 +6,7 @@ import neo4j from 'neo4j-driver';
 
 import { Driver as Neo4jDriver, Neo4jError } from 'neo4j-driver';
 
-import { CypherClient } from './cypher-service.js'
+import { CypherClient, QueryParameters } from './cypher-service.js'
 
 class Neo4jCypherClient implements CypherClient {
   driver: Neo4jDriver;
@@ -16,8 +16,8 @@ class Neo4jCypherClient implements CypherClient {
     this.driver.verifyAuthentication(); // ABKTODO -- fail early, or lazily at query request?
   }
 
-  query = (cypher: string) =>
-    Effect.tryPromise(() => this.driver.executeQuery(cypher));
+  query = (cypher: string, parameters?: QueryParameters) =>
+    Effect.tryPromise(() => this.driver.executeQuery(cypher, parameters));
 
   close = () => this.driver.close();
 }
