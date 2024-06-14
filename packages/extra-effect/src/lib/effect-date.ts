@@ -1,4 +1,4 @@
-import { pipe, Stream, Effect, Option, Chunk } from "effect"
+import { pipe, Stream, Effect, Option, Chunk, Array } from "effect"
 
 import { addDays, compareAsc } from "date-fns";
 
@@ -25,9 +25,13 @@ export const stepDaysUntil = (until:Date) => (day:Date) => pipe(
  * Construct a Stream of dates ranging from the Date to but not including
  * an end Date. 
  * */
-export const dateRange = (from:Date, until:Date) => {
-  return Stream.unfold(from, stepDaysUntil(until)) 
-}
+export const dateRange = (from:Date, until:Date) => Array.unfold(from, stepDaysUntil(until))
+
+/** 
+ * Construct a Stream of dates ranging from the Date to but not including
+ * an end Date. 
+ * */
+export const dateRangeStream = (from:Date, until:Date) => Stream.unfold(from, stepDaysUntil(until)) 
 
 /**
  * Return the earliest of two Dates.

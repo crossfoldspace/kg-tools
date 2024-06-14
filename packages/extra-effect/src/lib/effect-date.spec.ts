@@ -2,7 +2,7 @@ import { pipe, Stream, Effect, Chunk } from "effect"
 
 import { addDays, subDays } from "date-fns";
 
-import { dateInterval, dateRange, earliestDate, stepDays } from "./effect-date.js"
+import { dateInterval, dateRange, dateRangeStream, earliestDate, stepDays } from "./effect-date.js"
 
 describe('effect date', () => {
 
@@ -15,7 +15,7 @@ describe('effect date', () => {
     expect(earliestDate(later, earlier)).toBe(earlier);
   })
 
-  it('stepDays', async () => {
+  it('stepDays Stream', async () => {
     const days = Stream.unfold(new Date, stepDays).pipe(
       Stream.take(7),
       Stream.runCollect,
@@ -29,7 +29,7 @@ describe('effect date', () => {
   it('dateRange', async () => {
     const now = new Date();
     const tenDays = pipe(
-      dateRange(now, addDays(now, 10)),
+      dateRangeStream(now, addDays(now, 10)),
       Stream.runCollect,
       Effect.map(Chunk.toReadonlyArray)
     )
@@ -38,7 +38,7 @@ describe('effect date', () => {
     // console.log(dates); 
     expect(dates.length).toBe(10); // range excludes the upper bound
   })
-  it('10 day intervals', async () => {
+  it('dateInterval', async () => {
     const now = new Date();
     const weekly = pipe(
       dateInterval(now, addDays(now, 30), 7),
@@ -49,5 +49,18 @@ describe('effect date', () => {
 
     // console.log(dates);
     expect(dates.length).toBe(5); 
+  })
+  it('date intervals to contiguous days', async () => {
+    const now = new Date();
+    const days = pipe(
+      dateInterval(now, addDays(now, 14), 7),
+      Stream.mapConcat( interval => dateRange(interval[0], interval[1]) ),
+      Stream.runCollect,
+      Effect.map(Chunk.toReadonlyArray)
+    )
+    const result = await Effect.runPromise(days);
+
+    // console.log(result);
+    expect(result.length).toBe(14)
   })
 });
