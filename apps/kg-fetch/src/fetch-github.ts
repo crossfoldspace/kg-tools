@@ -24,7 +24,7 @@ const ghSearchTopics = (topics: string[]) =>
   topics.map((topic) => `${topic} in:topics`).join(' OR ');
 
 const ghSearchTopicBetween = (from: Date, to: Date, topics: string[]) =>
-  `${ghSearchTopics(topics)} created:${formatISO(from)}..${formatISO(to)}`;
+  `${topics[0]} in:readme created:${formatISO(from)}..${formatISO(to)} is:public`;
 
 const ghQuery =
   (from: Date, to: Date, topics: string[]) => (cursor: string) =>
@@ -53,6 +53,9 @@ const ghQuery =
             languages(first:20) {nodes {name}}
             forkCount
             stargazerCount
+            forks(visibility: PUBLIC, first:100, orderBy:{field:STARGAZERS, direction:DESC}) {
+                nodes {  nameWithOwner }
+            }
           }
         }
       }

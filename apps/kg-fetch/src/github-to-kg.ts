@@ -1,30 +1,11 @@
-import { FileSystem } from '@effect/platform';
-import {
-  NodeFileSystem,
-  NodeContext,
-  NodeRuntime,
-  NodeTerminal,
-} from '@effect/platform-node';
-import {
-  Array,
-  Config,
-  ConfigProvider,
-  Console,
-  Chunk,
-  Effect,
-  Option,
-  Stream,
-  pipe,
-} from 'effect';
-
-import { CypherClient } from "@crossfold/kg-cypher";
+import neo4j from 'neo4j-driver';
 
 import type { GithubSearchResult, GithubRepository } from './gh-response.js';
 
-export const mergeGithubRepository = (ghr: GithubRepository) => 
-  `
+export const cypherMergeGithubRepository = `
     MERGE (repo:GithubRepository { url: $url })
-    SET repo.owner = $owner,
+    SET repo.nameWithOwner = $nameWithOwner,
+        repo.owner = $owner,
         repo.name = $name,
         repo.description = $description,
         repo.updatedAt = $updatedAt,
@@ -33,5 +14,22 @@ export const mergeGithubRepository = (ghr: GithubRepository) =>
         repo.forkCount = $forkCount,
         repo.stargazerCount = $stargazerCount,
         repo.topics = $topics,
-        repo.languages = $languages
+        repo.languages = $languages,
+        repo.forks = $forks
   `
+
+export const normalizeRepo = (repo: GithubRepository) => ({
+    nameWithOwner: repo.nameWithOwner,
+    owner: repo.owner.login,
+    name: repo.name,
+    url: repo.url,
+    description: repo.description,
+    updatedAt: neo4j.types.Date.fromStandardDate(repo.updatedAt),
+    createdAt: neo4j.types.Date.fromStandardDate(repo.createdAt),
+    isTemplate: repo.isTemplate,
+    forkCount: repo.forkCount,
+    stargazerCount: repo.stargazerCount,
+    topics: repo.repositoryTopics.nodes.map(repoTopic => repoTopic.topic.name),
+    languages: repo.languages.nodes.map( lang => lang.name ),
+    forks: repo.forks.nodes.map( fork => fork.nameWithOwner )
+})

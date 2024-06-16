@@ -5,11 +5,11 @@ import { Array, Config, ConfigProvider, Console, Effect, Stream, Option, Either,
 
 import dotenv from 'dotenv'; 
 
-import neo4j from 'neo4j-driver';
 
-import { fetchGithubRepositories } from "./fetch-github.js"
 import { CypherClientService, connect as connectToNeo4j } from "@crossfold/kg-cypher";
-import { mergeGithubRepository } from "./github-to-kg.js";
+import { dateInterval } from "@crossfold/extra-effect"
+import { fetchGithubRepositories } from "./fetch-github.js"
+import { cypherMergeGithubRepository, normalizeRepo } from "./github-to-kg.js";
 
 dotenv.config();  // Load environment variables from .env file 
 
@@ -25,37 +25,24 @@ const ghPat = Options.text('pat').pipe(
   Options.withFallbackConfig(Config.string("GITHUB_PAT")),
 )
 
-export const ghtStream = Command.make(
-  'github',
+export const ghToKg = Command.make(
+  'ghToKg',
   { ghPat, topics, fromDate, toDate },
   ({ ghPat, topics, fromDate, toDate }) => CypherClientService.pipe(
-    Effect.andThen(cc =>
-      fetchGithubRepositories(ghPat, topics, fromDate, toDate).pipe(
-        // Stream.runForEach( repo => Console.log(repo.nameWithOwner))
-        Stream.runForEach( repo => pipe(
-          Effect.succeed(repo),
-          Effect.map( repo => ({
-              owner: repo.owner.login,
-              name: repo.name,
-              url: repo.url,
-              description: repo.description,
-              updatedAt: neo4j.types.Date.fromStandardDate(repo.updatedAt),
-              createdAt: neo4j.types.Date.fromStandardDate(repo.createdAt),
-              isTemplate: repo.isTemplate,
-              forkCount: repo.forkCount,
-              stargazerCount: repo.stargazerCount,
-              topics: repo.repositoryTopics.nodes.map(repoTopic => repoTopic.topic.name),
-              languages: repo.languages.nodes.map( lang => lang.name ),
-          })),
-          Effect.tap(params => Console.log(`${params.owner}/${params.name}`)),
-          Effect.flatMap(params => cc.query(mergeGithubRepository(repo), params))
+    Effect.andThen(cc => pipe(
+      dateInterval(fromDate, toDate, 7),
+      Stream.tap(interval => Console.log(`Fetching interval ${interval}`)),
+      Stream.flatMap(([intervalStart, intervalEnd]) => fetchGithubRepositories(ghPat, topics, intervalStart, intervalEnd)),
+      Stream.runForEach( repo => pipe(
+          Effect.succeed(normalizeRepo(repo)),
+          Effect.tap((params) => Console.log(`${params.owner}/${params.name}`)),
+          Effect.flatMap(params => cc.query(cypherMergeGithubRepository, params))
         ))
-      )
-    )
-  )
+    ))
+  ) 
 );
 
-const cli = Command.run(ghtStream, {
+const cli = Command.run(ghToKg, {
   name: "knowledge graph fetch",
   version: "v1.0.0"
 })

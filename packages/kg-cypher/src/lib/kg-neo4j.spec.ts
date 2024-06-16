@@ -1,4 +1,4 @@
-import { Effect, Console, pipe } from 'effect';
+import { Effect, Stream, Chunk, Console, pipe } from 'effect';
 
 import * as Neo4jClient from './kg-neo4j.js';
 import { CypherClient, CypherClientService } from './cypher-service.js';
@@ -30,7 +30,25 @@ describe('KG Cypher Client', () => {
     const runnable = Effect.scoped(
       Effect.provideServiceEffect(program, CypherClientService, neo4jClient)
     )
-     
     await Effect.runPromise(runnable);
+  })
+
+  it('can stream results', async () => {
+    const program = CypherClientService.pipe(
+      Effect.andThen( cc => pipe(
+        cc.stream("MATCH (n:GithubRepository) RETURN n.nameWithOwner"),
+        Stream.take(10),
+        Stream.runCollect,
+        Effect.map(Chunk.toArray)
+    )))
+
+    const neo4jClient = Neo4jClient.connect('neo4j://localhost:7687', 'neo4j', 'marwhompa');
+
+    const runnable = Effect.scoped(
+      Effect.provideServiceEffect(program, CypherClientService, neo4jClient)
+    )
+    const results = await Effect.runPromise(runnable);
+    console.log(results);
+    expect(results.length).toBe(10);
   })
 });

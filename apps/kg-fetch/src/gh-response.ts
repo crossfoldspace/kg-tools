@@ -21,7 +21,8 @@ export const GithubRepository = Schema.Struct(
     repositoryTopics: Schema.Struct({ nodes: Schema.Array(GithubTopic)}),
     languages: Schema.Struct({ nodes: Schema.Array(Schema.Struct({ name: Schema.String })) }),
     forkCount: Schema.Number,
-    stargazerCount: Schema.Number
+    stargazerCount: Schema.Number,
+    forks: Schema.Struct({ nodes: Schema.Array(Schema.Struct({nameWithOwner: Schema.String}))})
   }
 )
 export interface GithubRepository extends Schema.Schema.Type<typeof GithubRepository> {}
@@ -29,9 +30,9 @@ export interface GithubRepository extends Schema.Schema.Type<typeof GithubReposi
 export const GithubSearchResult = Schema.Struct({
   search: Schema.Struct({
     pageInfo: Schema.Struct({
-      startCursor: Schema.String,
+      startCursor: Schema.NullishOr(Schema.String),
       hasNextPage: Schema.Boolean,
-      endCursor: Schema.String
+      endCursor: Schema.NullishOr(Schema.String)
     }),
     repositoryCount: Schema.Number,
     nodes: Schema.Array(GithubRepository)

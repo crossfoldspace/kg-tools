@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Schema } from '@effect/schema';
-import { Effect, Context, pipe } from 'effect';
+import { Effect, Context, Stream, pipe } from 'effect';
 
-import {Date as Neo4jDate} from 'neo4j-driver/types';
+import {Date as Neo4jDate, RecordShape} from 'neo4j-driver/types';
 
 export type QueryParameterScalar = number | string | boolean | Neo4jDate<number>
 export type QueryParameterValue = QueryParameterScalar | QueryParameterScalar[] | QueryParameters | QueryParameters[]
@@ -13,6 +13,7 @@ export interface QueryParameters extends Readonly<Record<string, Readonly<QueryP
  */
 export interface CypherClient {
   readonly query: (cypher: string, parameters?: QueryParameters) => Effect.Effect<any, unknown, never>;
+  readonly stream: (cypher: string, parameters?: QueryParameters) => Stream.Stream<RecordShape, Error, never>;
   readonly close: () => Promise<void>;
 }
 
