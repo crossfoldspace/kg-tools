@@ -4,6 +4,7 @@ import {
   Effect,
   Option,
   Stream,
+  Schedule
 } from 'effect';
 import * as Http from '@effect/platform/HttpClient';
 
@@ -20,17 +21,16 @@ const ghApi = (pat: string) =>
     Http.request.setHeader('authorization', `token ${pat}`)
   );
 
-const ghSearchTopics = (topics: string[]) =>
-  topics.map((topic) => `${topic} in:topics`).join(' OR ');
+const ghSearchTopics = (topic: string) => `${topic} in:topics`
 
-const ghSearchTopicBetween = (from: Date, to: Date, topics: string[]) =>
-  `${topics[0]} in:readme created:${formatISO(from)}..${formatISO(to)} is:public`;
+const ghSearchTopicBetween = (from: Date, to: Date, topic: string) =>
+  `${topic} in:readme created:${formatISO(from)}..${formatISO(to)} is:public`;
 
 const ghQuery =
-  (from: Date, to: Date, topics: string[]) => (cursor: string) =>
+  (from: Date, to: Date, topic: string) => (cursor: string) =>
     `
     query topicalRepositories${cursor ? '($cursor: String!)' : ''} {
-      search(query:"${ghSearchTopicBetween(from, to, topics)}", type:REPOSITORY, first: 100, ${ cursor !== '' ? 'after: $cursor' : ''}) 
+      search(query:"${ghSearchTopicBetween(from, to, topic)}", type:REPOSITORY, first: 100, ${ cursor !== '' ? 'after: $cursor' : ''}) 
       {
         pageInfo {
           startCursor
@@ -64,18 +64,24 @@ const ghQuery =
 
 export const fetchGithubRepositories = (
   pat: string,
-  topics: string[],
+  topic: string,
   from: Date,
   to: Date
 ) => {
+  const policy = Schedule.intersect(
+    Schedule.exponential("10 millis"),
+    Schedule.recurs(10)
+  )
+  
   const ghApiWithAuth = ghApi(pat);
-  const queryWithCursor = ghQuery(from, to, topics);
+  const queryWithCursor = ghQuery(from, to, topic);
   const ghApiWithCursor = (cursor: string) =>
-    ghApiWithAuth.pipe(
+    Effect.retry(ghApiWithAuth.pipe(
       KgGraphQL.queryBody(queryWithCursor(cursor), { cursor }),
-      Effect.andThen(Http.client.fetch),
+      Effect.andThen(Http.client.fetchOk),
       KgGraphQL.graphqlResponse
-    );
+    ),
+    policy);
   return Stream.paginateChunkEffect('', (cursor) =>
     ghApiWithCursor(cursor).pipe(
       // Effect.tap((response) => Console.log(response)),

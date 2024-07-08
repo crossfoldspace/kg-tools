@@ -51,4 +51,4 @@ export const stepIntervalsUntil = (until:Date, interval:number) => (day:Date) =>
   Option.map(nextDay => [[day, earliestDate(nextDay, until)], nextDay] as const)
 )
 
-export const dateInterval = (from:Date, until:Date, interval:number) => Stream.unfold(from, stepIntervalsUntil(until, interval))
+export const dateIntervals = (from:Date, until:Date, interval:number) => Stream.unfold(from, stepIntervalsUntil(until, interval))

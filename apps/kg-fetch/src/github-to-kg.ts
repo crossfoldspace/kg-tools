@@ -4,6 +4,8 @@ import type { GithubSearchResult, GithubRepository } from './gh-response.js';
 
 export const cypherMergeGithubRepository = `
     MERGE (repo:GithubRepository { url: $url })
+    ON CREATE SET repo.mentions = [$mention]
+    ON MATCH SET repo.mentions = apoc.coll.toSet( repo.mentions + [$mention] )
     SET repo.nameWithOwner = $nameWithOwner,
         repo.owner = $owner,
         repo.name = $name,
