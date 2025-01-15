@@ -1,0 +1,34 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch
+  
+env:
+  GITHUB_PAT: ${{ secrets.QUERY_GH }}
+  NEO4J_URI: neo4j+s://7ef98a07.databases.neo4j.io
+  NEO4J_USERNAME: neo4j
+  NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "echo"
+  echo:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - name: Send greeting
+      run: echo "Hello ${{ inputs.name }}"
+    - name: Today and yesterday
+      run: echo "Running at" $(date -I) "and yesterday was" $(date -I -v-1d)
+    - name: Which node?
+      run: node --version
+    - name: What environment?
+      run: env
+
