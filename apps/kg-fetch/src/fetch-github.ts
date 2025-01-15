@@ -30,7 +30,7 @@ const ghQuery =
   (from: Date, to: Date, topic: string) => (cursor: string) =>
     `
     query topicalRepositories${cursor ? '($cursor: String!)' : ''} {
-      search(query:"${ghSearchTopicBetween(from, to, topic)}", type:REPOSITORY, first: 100, ${ cursor !== '' ? 'after: $cursor' : ''}) 
+      search(query:"${ghSearchTopicBetween(from, to, topic)}", type:REPOSITORY, is:public, first: 100, ${ cursor !== '' ? 'after: $cursor' : ''}) 
       {
         pageInfo {
           startCursor
