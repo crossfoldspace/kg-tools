@@ -9,7 +9,6 @@ on:
   
 env:
   GITHUB_PAT: ${{ secrets.QUERY_GH }}
-  NEO4J_URI: neo4j+s://7ef98a07.databases.neo4j.io
   NEO4J_USERNAME: neo4j
   NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
 
@@ -22,11 +21,11 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ inputs.name }}"
+    # Runs a few commands using the runners shell
+    - name: Help with date
+      run: date --help
     - name: Today and yesterday
-      run: echo "Running at" $(date -I) "and yesterday was" $(date -I -v-1d)
+      run: echo "Running at" $(date -I) "and yesterday was" $(date -I -d yesterday)
     - name: Which node?
       run: node --version
     - name: What environment?
