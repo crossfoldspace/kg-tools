@@ -3,9 +3,11 @@ name: Fetch Github repos about various topics
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
+
 env:
   GITHUB_PAT: ${{ secrets.QUERY_GH }}
-  NEO4J_URI: neo4j+s://7ef98a07.databases.neo4j.io
+  NEO4J_URI: ${{ vars.NEO4J_URI }}
   NEO4J_USERNAME: neo4j
   NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
 
@@ -21,11 +23,8 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
-  test_schedule:
+  update-neo4j:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - run: echo "Running at" $(date -I) "and yesterday was" $(date -I -v-1d)
-      - run: node --version
-      - run: env
-      - run: node dist/apps/kg-fetch/main.js fetchRepos --from "$(date -I -v-2d)" --to "$(date -I)" --interval 1 neo4j
+      - run: node dist/apps/kg-fetch/main.js fetchRepos --from $(date -I -d '-2 day') --to $(date -I) --interval 1 neo4j
