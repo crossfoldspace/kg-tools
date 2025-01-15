@@ -21,7 +21,6 @@
         "main": "packages/kg-cypher/src/index.ts",
         "tsConfig": "packages/kg-cypher/tsconfig.lib.json",
         "assets": ["packages/kg-cypher/*.md"],
-        "generatePackageJson": true,
         "format": ["cjs"]
       }
     },

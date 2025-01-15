@@ -21,7 +21,6 @@
         "main": "packages/extra-effect/src/index.ts",
         "tsConfig": "packages/extra-effect/tsconfig.lib.json",
         "assets": ["packages/extra-effect/*.md"],
-        "generatePackageJson": true,
         "format": ["cjs"]
       }
     },

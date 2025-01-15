@@ -21,7 +21,6 @@
         "main": "packages/kg-polars/src/index.ts",
         "tsConfig": "packages/kg-polars/tsconfig.lib.json",
         "assets": ["packages/kg-polars/*.md"],
-        "generatePackageJson": true,
         "format": ["cjs"]
       }
     },

@@ -21,7 +21,6 @@
         "main": "packages/kg-graphql/src/index.ts",
         "tsConfig": "packages/kg-graphql/tsconfig.lib.json",
         "assets": ["packages/kg-graphql/*.md"],
-        "generatePackageJson": true,
         "format": ["cjs"]
       }
     },
